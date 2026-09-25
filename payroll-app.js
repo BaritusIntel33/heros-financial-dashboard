@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const { MAX_SALARIED, MAX_HOURLY, emptyPayroll, compute, toLaborLines } = window.Payroll;
+  const { MAX_SALARIED, MAX_HOURLY, emptyPayroll, migrate, compute, toLaborLines } = window.Payroll;
   const STORAGE_KEY = 'payroll';
 
   const $ = (id) => document.getElementById(id);
@@ -12,20 +12,20 @@
   const fmtMoney = (n) => (Number.isFinite(n) ? money.format(n) : '—');
 
   const LIMITS = { salaried: MAX_SALARIED, hourly: MAX_HOURLY };
-  const BLANK = { salaried: () => ({ name: '', annual: 0 }), hourly: () => ({ name: '', rate: 0, hours: 0 }) };
+  const BLANK = { salaried: () => ({ name: '', annual: 0 }), hourly: () => ({ name: '', rate: 0, weeklyHours: 0 }) };
   const COLUMNS = {
     salaried: [
       { field: 'annual', label: 'Annual salary', money: true, step: '500' },
     ],
     hourly: [
       { field: 'rate', label: 'Hourly rate', money: true, step: '0.25' },
-      { field: 'hours', label: 'Hours per month', money: false, step: '1' },
+      { field: 'weeklyHours', label: 'Hours per week', money: false, step: '0.5' },
     ],
   };
 
   // ---------- storage ----------
   let payroll;
-  try { payroll = JSON.parse(localStorage.getItem(STORAGE_KEY)) || emptyPayroll(); } catch { payroll = emptyPayroll(); }
+  try { payroll = migrate(JSON.parse(localStorage.getItem(STORAGE_KEY)) || emptyPayroll()); } catch { payroll = emptyPayroll(); }
   function persist() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(payroll)); } catch { /* ignore */ }
   }
@@ -97,7 +97,7 @@
       $(`${group}-total`).textContent = `${fmtMoney(t[group])} / mo`;
       form.querySelector(`[data-payroll-add="${group}"]`).disabled = payroll[group].length >= LIMITS[group];
     }
-    $('hourly-total').textContent = `${Math.round(t.hours).toLocaleString()} hrs · ${fmtMoney(t.hourly)} / mo`;
+    $('hourly-total').textContent = `${+t.weeklyHours.toFixed(1)} hrs/wk · ${fmtMoney(t.hourly)} / mo`;
     $('burden-total').textContent = fmtMoney(t.burden);
     $('payroll-total').textContent = fmtMoney(t.total);
   }

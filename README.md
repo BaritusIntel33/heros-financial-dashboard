@@ -50,7 +50,7 @@ This tab is a profit and loss statement for each month, with editable line items
 Open it with **Payroll calculator** next to *Monthly labor* on the Required Revenue tab, or in the Labor section of the P&L.
 
 - **Salaried:** up to 5 people. Each has an annual salary, and the monthly amount is the salary ÷ 12.
-- **Hourly:** up to 5 people. Each has an hourly rate and hours per month, and the monthly amount is rate × hours.
+- **Hourly:** up to 5 people. Each has an hourly rate and hours per week, and the monthly amount is rate × hours per week × 52 ÷ 12 (about 4.33 weeks a month).
 - **Payroll taxes & benefits:** an optional percentage added on top.
 
 **Apply** puts the total into *Monthly labor* on the calculator. When opened from the P&L, it replaces the month's payroll lines with *Salaried payroll*, *Hourly payroll* and *Payroll taxes & benefits*. Any other labor lines you've added are kept.

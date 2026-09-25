@@ -3,7 +3,7 @@
  *
  * Payroll = {
  *   salaried: [{ name, annual }],        // up to 5, monthly = annual / 12
- *   hourly:   [{ name, rate, hours }],   // up to 5, monthly = rate × hours per month
+ *   hourly:   [{ name, rate, weeklyHours }], // up to 5, monthly = rate × weekly hours × 52 / 12
  *   burdenPct: number,                   // payroll taxes & benefits, decimal (0.1 = 10%)
  * }
  */
@@ -14,11 +14,23 @@
   const MAX_HOURLY = 5;
 
   const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+  const WEEKS_PER_MONTH = 52 / 12;
+
+  /** Converts payroll saved before hours were weekly (`hours` per month) to `weeklyHours`. */
+  function migrate(payroll) {
+    for (const p of payroll.hourly || []) {
+      if (p.weeklyHours === undefined && p.hours !== undefined) {
+        p.weeklyHours = Math.round((num(p.hours) / WEEKS_PER_MONTH) * 100) / 100;
+        delete p.hours;
+      }
+    }
+    return payroll;
+  }
 
   function emptyPayroll() {
     return {
       salaried: [{ name: '', annual: 0 }],
-      hourly: [{ name: '', rate: 0, hours: 0 }],
+      hourly: [{ name: '', rate: 0, weeklyHours: 0 }],
       burdenPct: 0,
     };
   }
@@ -27,11 +39,11 @@
     const salariedRows = (payroll.salaried || []).slice(0, MAX_SALARIED)
       .map((p) => ({ ...p, monthly: num(p.annual) / 12 }));
     const hourlyRows = (payroll.hourly || []).slice(0, MAX_HOURLY)
-      .map((p) => ({ ...p, monthly: num(p.rate) * num(p.hours) }));
+      .map((p) => ({ ...p, monthly: num(p.rate) * num(p.weeklyHours) * WEEKS_PER_MONTH }));
 
     const salaried = salariedRows.reduce((t, r) => t + r.monthly, 0);
     const hourly = hourlyRows.reduce((t, r) => t + r.monthly, 0);
-    const hours = hourlyRows.reduce((t, r) => t + num(r.hours), 0);
+    const weeklyHours = hourlyRows.reduce((t, r) => t + num(r.weeklyHours), 0);
     const burden = (salaried + hourly) * num(payroll.burdenPct);
 
     return {
@@ -39,7 +51,7 @@
       hourlyRows,
       salaried,
       hourly,
-      hours,
+      weeklyHours,
       burden,
       total: salaried + hourly + burden,
     };
@@ -56,7 +68,7 @@
       .map(([name, amount]) => ({ name, amount: Math.round(amount * 100) / 100 }));
   }
 
-  const api = { MAX_SALARIED, MAX_HOURLY, emptyPayroll, compute, toLaborLines };
+  const api = { MAX_SALARIED, MAX_HOURLY, WEEKS_PER_MONTH, emptyPayroll, migrate, compute, toLaborLines };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Payroll = api;
 })(typeof window !== 'undefined' ? window : globalThis);
