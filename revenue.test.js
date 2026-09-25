@@ -1,7 +1,7 @@
 // Run with: node --test
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { compute, DEFAULTS } = require('./revenue.js');
+const { compute, scenario, DEFAULTS } = require('./revenue.js');
 
 const close = (actual, expected, eps = 0.01) =>
   assert.ok(Math.abs(actual - expected) < eps, `expected ${expected}, got ${actual}`);
@@ -44,4 +44,27 @@ test('invalid COGS is reported, not thrown', () => {
   const r = compute({ cogsPct: 1 });
   assert.ok(r.errors.length > 0);
   assert.ok(Number.isNaN(r.requiredRevenue));
+});
+
+test('break-even scenario holds COGS and labor at their percentages', () => {
+  const breakEven = compute(DEFAULTS).breakEvenRevenue; // 23,943.66
+  const s = scenario(DEFAULTS, breakEven);
+  close(s.cogs, breakEven * 0.29);
+  close(s.labor, breakEven * 0.315);
+  close(s.reserve, breakEven * (1 - 0.29 - 0.315) - 4000); // 5,457.75 left over
+  close(s.reserveAfterProfit, s.reserve - 2000);
+  close(s.laborVsCurrent, breakEven * 0.315 - 13000);
+});
+
+test('each $100 step moves the reserve by $100 × (1 − COGS% − labor%)', () => {
+  const a = scenario(DEFAULTS, 20000);
+  const b = scenario(DEFAULTS, 20100);
+  close(b.reserve - a.reserve, 100 * 0.395);
+});
+
+test('reserve is zero at OpEx / (1 − COGS% − labor%)', () => {
+  const s = scenario(DEFAULTS, 0);
+  close(s.zeroReserveRevenue, 4000 / 0.395);
+  close(scenario(DEFAULTS, s.zeroReserveRevenue).reserve, 0);
+  close(scenario(DEFAULTS, s.profitReserveRevenue).reserveAfterProfit, 0);
 });

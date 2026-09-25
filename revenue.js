@@ -78,7 +78,31 @@
     };
   }
 
-  const api = { DEFAULTS, compute, grossUp };
+  /**
+   * What's left at a given revenue when COGS and labor are held at their set
+   * percentages (COGS % and labor target %) and OpEx stays fixed.
+   */
+  function scenario(input, revenue) {
+    const i = { ...DEFAULTS, ...input };
+    const cogs = revenue * i.cogsPct;
+    const labor = revenue * i.laborTargetPct;
+    const reserve = revenue - cogs - labor - i.opex;
+    return {
+      revenue,
+      cogs,
+      labor,
+      opex: i.opex,
+      reserve,
+      reserveAfterProfit: reserve - i.desiredProfit,
+      // Labor dollars the target % allows here, compared with actual monthly labor.
+      laborVsCurrent: labor - i.labor,
+      // Revenue at which the reserve is exactly $0, and exactly the desired profit.
+      zeroReserveRevenue: grossUp(i.opex, i.cogsPct + i.laborTargetPct),
+      profitReserveRevenue: grossUp(i.opex + i.desiredProfit, i.cogsPct + i.laborTargetPct),
+    };
+  }
+
+  const api = { DEFAULTS, compute, grossUp, scenario };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Revenue = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -372,6 +372,37 @@ input[type="range"] { accent-color: var(--accent); height: 20px; }
 .num { text-align: right; }
 
 /* =====================================================================
+   Break-even scenario
+   ===================================================================== */
+.sc-intro { color: var(--muted); font-size: 0.85rem; margin: -6px 0 16px; }
+
+.stepper { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; max-width: 420px; }
+.stepper .btn.step { height: 44px; padding: 0 16px; font-weight: 600; font-variant-numeric: tabular-nums; user-select: none; touch-action: manipulation; }
+.stepper .input-wrap input { height: 44px; text-align: center; font-size: 1.1rem; font-weight: 600; }
+.sc-offset { margin: 8px 0 16px; color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+
+.sc-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 640px) { .sc-grid { grid-template-columns: 1fr; } }
+
+.sc-table tr:first-child td { font-size: 1rem; }
+
+.reserve {
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+}
+.reserve[data-tone="good"] { border-color: color-mix(in srgb, var(--good) 45%, var(--border)); background: color-mix(in srgb, var(--good) 8%, var(--panel)); }
+.reserve[data-tone="bad"]  { border-color: color-mix(in srgb, var(--bad) 45%, var(--border));  background: color-mix(in srgb, var(--bad) 8%, var(--panel)); }
+.reserve-value { font-size: 2rem; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; margin: 2px 0; }
+.reserve .note { color: var(--muted); font-size: 0.85rem; }
+
+.reserve-details { margin: 14px 0 0; display: grid; gap: 8px; font-size: 0.85rem; }
+.reserve-details div { display: flex; justify-content: space-between; gap: 12px; padding-top: 8px; border-top: 1px solid var(--border); }
+.reserve-details dt { color: var(--muted); }
+.reserve-details dd { margin: 0; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* =====================================================================
    Monthly P&L
    ===================================================================== */
 #view-pnl { grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); }

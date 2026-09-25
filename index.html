@@ -119,6 +119,44 @@
         </div>
       </div>
 
+      <div class="panel scenario" aria-labelledby="sc-title">
+        <div class="panel-head">
+          <h2 id="sc-title">Break-even scenario</h2>
+          <button type="button" class="text-btn" id="sc-reset">Reset to break-even</button>
+        </div>
+        <p class="sc-intro">Move revenue up or down from break-even. COGS and labor stay at their set percentages and OpEx stays fixed, so the reserve shows what you can add or need to cut.</p>
+
+        <div class="stepper">
+          <button type="button" class="btn step" data-step="-100" aria-label="Decrease revenue by $100">− $100</button>
+          <div class="input-wrap money"><input type="number" id="sc-revenue" min="0" step="100" inputmode="decimal" aria-label="Scenario revenue" /></div>
+          <button type="button" class="btn step" data-step="100" aria-label="Increase revenue by $100">+ $100</button>
+        </div>
+        <p class="sc-offset" id="sc-offset"></p>
+
+        <div class="sc-grid">
+          <table class="paths sc-table">
+            <tbody>
+              <tr><th scope="row">Revenue</th><td id="sc-rev">—</td></tr>
+              <tr><th scope="row" id="sc-cogs-label">COGS</th><td id="sc-cogs">—</td></tr>
+              <tr><th scope="row" id="sc-labor-label">Labor</th><td id="sc-labor">—</td></tr>
+              <tr><th scope="row">OpEx (fixed)</th><td id="sc-opex">—</td></tr>
+            </tbody>
+          </table>
+
+          <div class="reserve" id="sc-reserve-box">
+            <p class="eyebrow">Reserve</p>
+            <p class="reserve-value" id="sc-reserve">—</p>
+            <p class="note" id="sc-reserve-note">—</p>
+            <dl class="reserve-details">
+              <div><dt id="sc-after-label">After desired profit</dt><dd id="sc-after">—</dd></div>
+              <div><dt id="sc-labor-vs-label">Labor budget vs current labor</dt><dd id="sc-labor-vs">—</dd></div>
+              <div><dt>Reserve is $0 at</dt><dd id="sc-zero">—</dd></div>
+              <div><dt>Reserve covers profit goal at</dt><dd id="sc-goal">—</dd></div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
       <div class="panel">
         <h2>Paths to target</h2>
         <table class="paths">

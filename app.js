@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const { DEFAULTS, compute } = window.Revenue;
+  const { DEFAULTS, compute, scenario } = window.Revenue;
   const STORAGE_KEY = 'required-revenue-inputs';
   const PCT_FIELDS = new Set(['cogsPct', 'laborTargetPct', 'primeLowPct', 'primeHighPct']);
   const FIELDS = Object.keys(DEFAULTS);
@@ -72,6 +72,7 @@
     }
 
     renderBar(r);
+    renderScenario(r);
 
     $('breakEvenRevenue').textContent = fmtMoney(r.breakEvenRevenue);
 
@@ -135,6 +136,98 @@
       legend.append(li);
     }
   }
+
+  // ---------- break-even scenario ----------
+  // Revenue is kept as an offset from break-even so it follows changes to the inputs.
+  const SCENARIO_KEY = 'scenario-offset';
+  const STEP = 100;
+  let offset = 0;
+  try { offset = Number(localStorage.getItem(SCENARIO_KEY)) || 0; } catch { /* ignore */ }
+  let lastResult = null;
+
+  const signed = (n) => (n >= 0 ? `+${fmtMoney(n)}` : fmtMoney(n));
+
+  function setOffset(next) {
+    offset = Math.round(next * 100) / 100;
+    try { localStorage.setItem(SCENARIO_KEY, String(offset)); } catch { /* ignore */ }
+    renderScenario(lastResult);
+  }
+
+  function renderScenario(r) {
+    lastResult = r;
+    const base = r.breakEvenRevenue;
+    const revInput = $('sc-revenue');
+    if (!Number.isFinite(base)) {
+      revInput.value = '';
+      return;
+    }
+    const revenue = Math.max(0, base + offset);
+    const s = scenario(r.inputs, revenue);
+    const i = r.inputs;
+
+    if (document.activeElement !== revInput) revInput.value = Math.round(revenue);
+    $('sc-offset').textContent = Math.abs(offset) < 0.5
+      ? `At break-even revenue (${fmtMoney(base)})`
+      : `${signed(offset)} from break-even (${fmtMoney(base)})`;
+
+    $('sc-rev').textContent = fmtMoney(s.revenue);
+    $('sc-cogs-label').textContent = `COGS at ${pctLabel(i.cogsPct)}`;
+    $('sc-cogs').textContent = `−${fmtMoney(s.cogs)}`;
+    $('sc-labor-label').textContent = `Labor at ${pctLabel(i.laborTargetPct)}`;
+    $('sc-labor').textContent = `−${fmtMoney(s.labor)}`;
+    $('sc-opex').textContent = `−${fmtMoney(s.opex)}`;
+
+    const tone = s.reserve >= 0 ? 'good' : 'bad';
+    const reserve = $('sc-reserve');
+    reserve.textContent = signed(s.reserve);
+    setTone(reserve, tone);
+    $('sc-reserve-box').dataset.tone = tone;
+    $('sc-reserve-note').textContent = s.reserve >= 0
+      ? `Left over: room to add ${fmtMoney(s.reserve)} a month`
+      : `Short: ${fmtMoney(-s.reserve)} a month to cut or cover`;
+
+    $('sc-after-label').textContent = `After ${fmtMoney(i.desiredProfit)} desired profit`;
+    const after = $('sc-after');
+    after.textContent = signed(s.reserveAfterProfit);
+    setTone(after, s.reserveAfterProfit >= 0 ? 'good' : 'bad');
+
+    const laborVs = $('sc-labor-vs');
+    laborVs.textContent = s.laborVsCurrent >= 0
+      ? `${fmtMoney(s.labor)} budget, ${fmtMoney(s.laborVsCurrent)} to spare`
+      : `${fmtMoney(s.labor)} budget, ${fmtMoney(-s.laborVsCurrent)} over`;
+    setTone(laborVs, s.laborVsCurrent >= 0 ? 'good' : 'bad');
+    $('sc-labor-vs-label').textContent = `Labor budget vs current ${fmtMoney(i.labor)}`;
+
+    $('sc-zero').textContent = fmtMoney(s.zeroReserveRevenue);
+    $('sc-goal').textContent = fmtMoney(s.profitReserveRevenue);
+  }
+
+  // Step buttons: click for one step, hold to repeat.
+  let holdTimer = null;
+  function stopHold() {
+    clearTimeout(holdTimer);
+    clearInterval(holdTimer);
+    holdTimer = null;
+  }
+  document.querySelectorAll('.step').forEach((btn) => {
+    const delta = Number(btn.dataset.step);
+    btn.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      setOffset(offset + delta);
+      stopHold();
+      holdTimer = setTimeout(() => { holdTimer = setInterval(() => setOffset(offset + delta), 80); }, 400);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => btn.addEventListener(ev, stopHold));
+    // Keyboard (Enter/Space) fires click without pointerdown.
+    btn.addEventListener('click', (e) => { if (e.detail === 0) setOffset(offset + delta); });
+  });
+
+  $('sc-revenue').addEventListener('input', (e) => {
+    const n = parseFloat(e.target.value);
+    if (Number.isFinite(n) && lastResult) setOffset(n - lastResult.breakEvenRevenue);
+  });
+  $('sc-revenue').addEventListener('blur', () => renderScenario(lastResult));
+  $('sc-reset').addEventListener('click', () => setOffset(0));
 
   // ---------- events ----------
   form.addEventListener('input', (e) => {

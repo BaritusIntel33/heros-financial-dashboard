@@ -34,6 +34,25 @@ It also shows:
 
 Labor and OpEx are treated as fixed monthly dollars. COGS scales with revenue.
 
+### Break-even scenario
+
+The scenario starts at break-even revenue. Use **− $100** and **+ $100** to move revenue down or up (hold a button to repeat), or type an amount.
+
+As revenue moves, COGS and labor stay at their set percentages (COGS % and the labor target %) and OpEx stays fixed. The **Reserve** is what's left:
+
+```
+Reserve = Revenue − Revenue × COGS % − Revenue × Labor target % − OpEx
+```
+
+Green means money left over that you could add to spending. Red means a shortfall to cut or cover. Each $100 of revenue changes the reserve by $100 × (1 − COGS % − labor %), which is $39.50 at the defaults.
+
+The Reserve box also shows:
+
+- the reserve after your desired profit
+- the labor budget at this revenue compared with your current monthly labor
+- the revenue where the reserve is $0
+- the revenue where the reserve covers your profit goal
+
 ## Monthly P&L
 
 This tab is a profit and loss statement for each month, with editable line items grouped into **Sales**, **Cost of goods sold**, **Labor** and **Operating expenses**.
