@@ -167,6 +167,30 @@
     try { localStorage.setItem('theme', root.dataset.theme); } catch { /* ignore */ }
   });
 
+  // ---------- tabs (hash routing so each tab has its own link) ----------
+  const VIEWS = ['revenue', 'pnl'];
+  function showView() {
+    const name = location.hash.slice(1);
+    const active = VIEWS.includes(name) ? name : 'revenue';
+    document.querySelectorAll('.view').forEach((v) => { v.hidden = v.dataset.view !== active; });
+    document.querySelectorAll('.tab').forEach((t) => {
+      if (t.dataset.view === active) t.setAttribute('aria-current', 'page');
+      else t.removeAttribute('aria-current');
+    });
+    document.dispatchEvent(new CustomEvent('viewchange', { detail: active }));
+  }
+  window.addEventListener('hashchange', showView);
+
   writeForm(load());
   render();
+  showView();
+
+  // Shared with the P&L tab.
+  window.RevenueApp = {
+    getResult: () => compute(readForm()),
+    setInputs(partial) {
+      writeForm({ ...readForm(), ...partial });
+      render();
+    },
+  };
 })();

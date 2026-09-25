@@ -1,14 +1,16 @@
-# Hero's Pizza Financial Dashboard — Required Revenue Calculator
+# Hero's Pizza Financial Dashboard
 
-A small, dependency-free web calculator that works out the monthly revenue a business needs to cover its costs and hit a profit goal.
+A small, dependency-free financial dashboard. It has two tabs and a payroll calculator that works with both.
+
+**Live site:** https://baritusintel33.github.io/heros-financial-dashboard/
+
+## Required Revenue
+
+This tab works out the monthly revenue needed to cover costs and hit a profit goal.
 
 ```
 Required Revenue = (Labor + OpEx + Desired Profit) ÷ (1 − COGS %)
 ```
-
-Every input can be edited, results update as you type, and your last values are remembered in the browser.
-
-## Inputs
 
 | Input                   | Default   |
 | ----------------------- | --------- |
@@ -22,25 +24,44 @@ Every input can be edited, results update as you type, and your last values are 
 
 With these defaults the required revenue is **$26,761** per month, which is $9,761 (+57.4%) above current revenue.
 
-## Outputs
+It also shows:
 
-- **Required monthly revenue**, the gap to current revenue, and a breakdown into COGS, labor, OpEx and profit
-- **Break-even revenue**: the revenue that covers all costs with $0 profit
-- **Profit at current revenue**
-- **Labor %** and **prime cost %** (COGS + labor) at the required revenue, compared with your targets
-- **Paths to target**:
-  - the labor budget at the target %
-  - how much labor would need to come down to reach it
-  - the revenue needed if labor ran at the target %
-  - the revenue at which current labor or prime cost reaches each target
+- the break-even revenue
+- profit at current revenue
+- labor % and prime cost % compared with your targets
+- a breakdown of the required revenue into COGS, labor, OpEx and profit
+- **Paths to target**: the labor budget at the target %, and the revenue at which labor or prime cost reaches each target
 
 Labor and OpEx are treated as fixed monthly dollars. COGS scales with revenue.
 
+## Monthly P&L
+
+This tab is a profit and loss statement for each month, with editable line items grouped into **Sales**, **Cost of goods sold**, **Labor** and **Operating expenses**.
+
+- Each line shows its **% of sales**. The statement shows subtotals, **gross profit**, **prime cost** and **net profit**.
+- **Compared with targets** checks the month against the Required Revenue tab: required revenue, COGS %, labor %, prime cost range and profit goal.
+- Use the arrows or the month picker to move between months. A new month starts with the previous month's line names, and **Copy previous month** copies the amounts as well.
+- **Send to calculator** loads the month's sales, COGS %, labor and OpEx into the Required Revenue tab.
+- **Export CSV** downloads the month's statement.
+- **Back up** and **Restore** save and load every month as a JSON file.
+
+## Payroll calculator
+
+Open it with **Payroll calculator** next to *Monthly labor* on the Required Revenue tab, or in the Labor section of the P&L.
+
+- **Salaried:** up to 5 people. Each has an annual salary, and the monthly amount is the salary ÷ 12.
+- **Hourly:** up to 5 people. Each has an hourly rate and hours per month, and the monthly amount is rate × hours.
+- **Payroll taxes & benefits:** an optional percentage added on top.
+
+**Apply** puts the total into *Monthly labor* on the calculator. When opened from the P&L, it replaces the month's payroll lines with *Salaried payroll*, *Hourly payroll* and *Payroll taxes & benefits*. Any other labor lines you've added are kept.
+
+## Data
+
+Everything is saved in your browser's local storage, so it stays on your device and isn't uploaded anywhere. Use **Back up** on the P&L tab to keep a copy or move your data to another browser.
+
 ## Run it
 
-Open `index.html` in a browser. There is nothing to build or install.
-
-To serve it locally:
+Open `index.html` in a browser. There is nothing to build or install. To serve it locally:
 
 ```bash
 npx serve .
@@ -48,24 +69,22 @@ npx serve .
 
 ## Tests
 
-The calculation logic is in `revenue.js`, which has no DOM code, so it can be tested with Node 18+:
+The calculations have no DOM code, so they can be tested with Node 18+:
 
 ```bash
 node --test
 ```
 
-## Deploy to GitHub Pages
-
-1. Push this folder to a GitHub repository.
-2. Go to **Settings → Pages**.
-3. Under **Source**, choose **Deploy from a branch**, pick `main` and `/ (root)`, then save.
-
 ## Files
 
-| File              | Purpose                                  |
-| ----------------- | ---------------------------------------- |
-| `index.html`      | Page markup                              |
-| `style.css`       | Styles, with light and dark themes       |
-| `revenue.js`      | Calculation logic                        |
-| `app.js`          | Connects the inputs and results          |
-| `revenue.test.js` | Unit tests                               |
+| File              | Purpose                                         |
+| ----------------- | ----------------------------------------------- |
+| `index.html`      | Page markup for both tabs and the payroll dialog |
+| `style.css`       | Styles, with light and dark themes              |
+| `revenue.js`      | Required revenue math                           |
+| `pnl.js`          | P&L math and CSV export                         |
+| `payroll.js`      | Payroll math                                    |
+| `app.js`          | Required Revenue tab, tab switching, theme      |
+| `pnl-app.js`      | Monthly P&L tab                                 |
+| `payroll-app.js`  | Payroll dialog                                  |
+| `*.test.js`       | Unit tests                                      |
