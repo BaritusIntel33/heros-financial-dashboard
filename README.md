@@ -46,6 +46,8 @@ Reserve = Revenue − Revenue × COGS % − Revenue × Labor target % − OpEx
 
 Green means money left over that you could add to spending. Red means a shortfall to cut or cover. Each $100 of revenue changes the reserve by $100 × (1 − COGS % − labor %), which is $39.50 at the defaults.
 
+A stacked bar shows how the scenario revenue splits into COGS, labor, OpEx and the reserve, in dollars and as a % of revenue. When costs exceed revenue, the overrun shows as a striped red **Shortfall** past a marker where revenue ends.
+
 The Reserve box also shows:
 
 - the reserve after your desired profit

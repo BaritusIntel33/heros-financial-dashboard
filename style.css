@@ -381,6 +381,33 @@ input[type="range"] { accent-color: var(--accent); height: 20px; }
 .stepper .input-wrap input { height: 44px; text-align: center; font-size: 1.1rem; font-weight: 600; }
 .sc-offset { margin: 8px 0 16px; color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
 
+.sc-bar-wrap { position: relative; margin: 0 0 12px; }
+.sc-bar-wrap .bar { margin: 0; height: 18px; }
+.seg-reserve { background: var(--seg-profit); }
+.seg-shortfall {
+  background: repeating-linear-gradient(135deg, var(--bad) 0 6px, color-mix(in srgb, var(--bad) 45%, transparent) 6px 12px);
+}
+.sc-marker {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text);
+  border-radius: 1px;
+}
+.sc-marker span {
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.sc-legend { margin-bottom: 20px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+
 .sc-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 640px) { .sc-grid { grid-template-columns: 1fr; } }
 

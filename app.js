@@ -200,6 +200,48 @@
 
     $('sc-zero').textContent = fmtMoney(s.zeroReserveRevenue);
     $('sc-goal').textContent = fmtMoney(s.profitReserveRevenue);
+
+    renderScenarioBar(s, i);
+  }
+
+  /**
+   * Stacked bar of where scenario revenue goes. With a shortfall the bar is scaled
+   * to total costs, the overrun is striped, and a marker shows where revenue ends.
+   */
+  function renderScenarioBar(s, i) {
+    const costs = s.cogs + s.labor + s.opex;
+    const total = Math.max(s.revenue, costs);
+    const bar = $('sc-bar');
+    const legend = $('sc-legend');
+    const marker = $('sc-marker');
+    bar.replaceChildren();
+    legend.replaceChildren();
+    if (!(total > 0)) { marker.hidden = true; return; }
+
+    const segments = [
+      ['cogs', 'COGS', s.cogs],
+      ['labor', 'Labor', s.labor],
+      ['opex', 'OpEx', s.opex],
+      s.reserve >= 0 ? ['reserve', 'Reserve', s.reserve] : ['shortfall', 'Shortfall', -s.reserve],
+    ];
+
+    for (const [key, label, amount] of segments) {
+      const ofRevenue = s.revenue > 0 ? amount / s.revenue : NaN;
+      const seg = document.createElement('span');
+      seg.className = `seg seg-${key}`;
+      seg.style.flexGrow = Math.max(amount / total, 0);
+      seg.title = `${label}: ${fmtMoney(amount)} (${fmtPct(ofRevenue)} of revenue)`;
+      bar.append(seg);
+
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="swatch seg-${key}"></span>${label}<b>${fmtMoney(amount)}</b><em>${fmtPct(ofRevenue)}</em>`;
+      legend.append(li);
+    }
+
+    marker.hidden = s.reserve >= 0;
+    if (s.reserve < 0) marker.style.left = `${(s.revenue / total) * 100}%`;
+    bar.setAttribute('aria-label',
+      `Of ${fmtMoney(s.revenue)} revenue: ` + segments.map(([, l, a]) => `${l} ${fmtMoney(a)}`).join(', '));
   }
 
   // Step buttons: click for one step, hold to repeat.
