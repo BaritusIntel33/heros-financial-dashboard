@@ -35,7 +35,7 @@ Labor and OpEx are treated as fixed monthly dollars. COGS scales with revenue.
 
 ### Break-even scenario
 
-The scenario starts at break-even revenue. Use **− $100** and **+ $100** to move revenue down or up (hold a button to repeat), or type an amount.
+Use **− $100** and **+ $100** to move revenue down or up (hold a button to repeat), or type an amount. Where the scenario starts depends on the **Labor** switch below.
 
 As revenue moves, COGS and labor stay at their set percentages (COGS % and the labor target %) and OpEx stays fixed. The **Reserve** is what's left:
 
@@ -47,8 +47,8 @@ Green means money left over that you could add to spending. Red means a shortfal
 
 The **Labor** switch chooses how labor is counted:
 
-- **Target %**, the default: labor is the target % of revenue (31.5% at the defaults). The reserve shows what you'd free up if labor ran at target. Each $100 of revenue adds $100 × (1 − COGS % − labor %), which is $39.50.
-- **Actual $:** labor is your real monthly labor dollars and stays fixed as revenue moves. The reserve is your real profit or loss at that revenue: $0 at break-even, and it reaches your profit goal at the required revenue. Each $100 of revenue adds $100 × (1 − COGS %), which is $71. The box shows labor as a % of revenue compared with your target.
+- **Target %**, the default: starts at the revenue where your actual payroll equals the labor target %. That is **Revenue = Payroll ÷ Target %**, so $13,000 ÷ 31.5% = $41,270. If payroll goes up, that revenue goes up; if the target % goes up, it goes down (35% gives $37,143). As you step, labor moves with revenue at the target %, so each $100 supports $31.50 of payroll and adds $100 × (1 − COGS % − labor %) = $39.50 to the reserve. You can change the target % right in the scenario; it's the same value as the Labor target input.
+- **Actual $:** starts at break-even revenue. Labor is your real monthly labor dollars and stays fixed as revenue moves. The reserve is your real profit or loss at that revenue: $0 at break-even, and it reaches your profit goal at the required revenue. Each $100 of revenue adds $100 × (1 − COGS %), which is $71. The box shows labor as a % of revenue compared with your target.
 
 A stacked bar shows how the scenario revenue splits into COGS, labor, OpEx and the reserve, in dollars and as a % of revenue. When costs exceed revenue, the overrun shows as a striped red **Shortfall** past a marker where revenue ends.
 

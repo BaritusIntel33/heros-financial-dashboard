@@ -129,7 +129,9 @@
   }
 
   // ---------- break-even scenario ----------
-  // Revenue is kept as an offset from break-even so it follows changes to the inputs.
+  // Revenue is kept as an offset from a starting point so it follows changes to the inputs:
+  //   Target mode: the revenue where actual payroll = labor target % (payroll ÷ target %).
+  //   Actual mode: break-even revenue.
   const SCENARIO_KEY = 'scenario-offset';
   const STEP = 100;
   let offset = 0;
@@ -148,32 +150,49 @@
     renderScenario(lastResult);
   }
 
+  const cents = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
+  const perStep = (n) => cents.format(n).replace(/\.00$/, '');
+
+  function scenarioBase(r) {
+    return laborMode === 'actual' ? r.breakEvenRevenue : r.laborTargetRevenue;
+  }
+
   function renderScenario(r) {
     lastResult = r;
-    const base = r.breakEvenRevenue;
-    const revInput = $('sc-revenue');
-    if (!Number.isFinite(base)) {
-      revInput.value = '';
-      return;
-    }
-    const revenue = Math.max(0, base + offset);
-    const s = scenario(r.inputs, revenue, laborMode);
     const i = r.inputs;
     const actual = laborMode === 'actual';
+    const base = scenarioBase(r);
+    const revInput = $('sc-revenue');
 
     for (const btn of document.querySelectorAll('[data-labor-mode]')) {
       btn.setAttribute('aria-checked', String(btn.dataset.laborMode === laborMode));
     }
     $('sc-mode-target').textContent = `Target ${pctLabel(i.laborTargetPct)}`;
     $('sc-mode-actual').textContent = `Actual ${fmtMoney(i.labor)}`;
+    $('sc-target-field').hidden = actual;
+    const targetInput = $('sc-target-pct');
+    if (document.activeElement !== targetInput) targetInput.value = +(i.laborTargetPct * 100).toFixed(2);
+    $('sc-reset').textContent = actual ? 'Reset to break-even' : 'Reset to payroll at target';
+
+    if (!Number.isFinite(base)) {
+      revInput.value = '';
+      $('sc-offset').textContent = actual ? 'Break-even can’t be calculated with these inputs.' : 'Set a labor target above 0%.';
+      return;
+    }
+    const revenue = Math.max(0, base + offset);
+    const s = scenario(i, revenue, laborMode);
+
     $('sc-intro').textContent = actual
-      ? `Move revenue up or down from break-even. COGS stays at ${pctLabel(i.cogsPct)}, while labor (${fmtMoney(i.labor)}) and OpEx stay fixed dollars, so each $100 of revenue adds ${fmtMoney(100 * (1 - i.cogsPct))} to the reserve.`
-      : `Move revenue up or down from break-even. COGS and labor stay at their set percentages and OpEx stays fixed, so each $100 of revenue adds ${fmtMoney(100 * (1 - i.cogsPct - i.laborTargetPct))} to the reserve.`;
+      ? `Move revenue up or down from break-even. COGS stays at ${pctLabel(i.cogsPct)}, while labor (${fmtMoney(i.labor)}) and OpEx stay fixed dollars, so each $100 of revenue adds ${perStep(100 * (1 - i.cogsPct))} to the reserve.`
+      : `Starts where your ${fmtMoney(i.labor)} payroll is exactly ${pctLabel(i.laborTargetPct)} of revenue (payroll ÷ target %). Labor moves with revenue at ${pctLabel(i.laborTargetPct)}, so each $100 of revenue supports ${perStep(100 * i.laborTargetPct)} of payroll and adds ${perStep(100 * (1 - i.cogsPct - i.laborTargetPct))} to the reserve.`;
 
     if (document.activeElement !== revInput) revInput.value = Math.round(revenue);
+    const where = actual
+      ? `break-even (${fmtMoney(base)})`
+      : `${fmtMoney(base)}, where ${fmtMoney(i.labor)} payroll = ${pctLabel(i.laborTargetPct)}`;
     $('sc-offset').textContent = Math.abs(offset) < 0.5
-      ? `At break-even revenue (${fmtMoney(base)})`
-      : `${signed(offset)} from break-even (${fmtMoney(base)})`;
+      ? `At ${where}`
+      : `${signed(offset)} from ${where}`;
 
     $('sc-rev').textContent = fmtMoney(s.revenue);
     $('sc-cogs-label').textContent = `COGS at ${pctLabel(i.cogsPct)}`;
@@ -276,18 +295,28 @@
 
   $('sc-revenue').addEventListener('input', (e) => {
     const n = parseFloat(e.target.value);
-    if (Number.isFinite(n) && lastResult) setOffset(n - lastResult.breakEvenRevenue);
+    if (Number.isFinite(n) && lastResult) setOffset(n - scenarioBase(lastResult));
   });
   $('sc-revenue').addEventListener('blur', () => renderScenario(lastResult));
   $('sc-reset').addEventListener('click', () => setOffset(0));
 
   document.querySelectorAll('[data-labor-mode]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      if (laborMode === btn.dataset.laborMode) return;
       laborMode = btn.dataset.laborMode;
       try { localStorage.setItem(LABOR_MODE_KEY, laborMode); } catch { /* ignore */ }
-      renderScenario(lastResult);
+      setOffset(0); // each mode has its own starting revenue
     });
   });
+
+  // The scenario's target % is the same value as the Labor target input.
+  $('sc-target-pct').addEventListener('input', (e) => {
+    const n = parseFloat(e.target.value);
+    if (!Number.isFinite(n) || n <= 0 || n >= 100) return;
+    writeForm({ ...readForm(), laborTargetPct: n / 100 });
+    render();
+  });
+  $('sc-target-pct').addEventListener('blur', () => renderScenario(lastResult));
 
   // ---------- events ----------
   form.addEventListener('input', (e) => {

@@ -131,6 +131,10 @@
           <button type="button" role="radio" class="seg-opt" data-labor-mode="target" id="sc-mode-target">Target %</button>
           <button type="button" role="radio" class="seg-opt" data-labor-mode="actual" id="sc-mode-actual">Actual $</button>
         </div>
+        <label class="sc-target" id="sc-target-field">
+          <span>Labor target</span>
+          <span class="input-wrap pct"><input type="number" id="sc-target-pct" min="1" max="99" step="0.5" inputmode="decimal" /></span>
+        </label>
 
         <div class="stepper">
           <button type="button" class="btn step" data-step="-100" aria-label="Decrease revenue by $100">− $100</button>

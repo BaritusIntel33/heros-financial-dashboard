@@ -76,3 +76,16 @@ test('actual-labor scenario: each $100 adds $100 × (1 − COGS%)', () => {
   const b = scenario(DEFAULTS, 20100, 'actual');
   close(b.reserve - a.reserve, 71);
 });
+
+test('target mode starts where actual payroll equals the target %', () => {
+  const r = compute(DEFAULTS);
+  close(r.laborTargetRevenue, 13000 / 0.315); // 41,269.84
+  const s = scenario(DEFAULTS, r.laborTargetRevenue, 'target');
+  close(s.labor, 13000); // target % of that revenue is exactly the real payroll
+  close(s.laborVsCurrent, 0);
+  close(s.reserve, r.laborTargetRevenue * (1 - 0.29) - 13000 - 4000);
+
+  // Higher payroll → higher revenue; higher target % → lower revenue.
+  assert.ok(compute({ labor: 14000 }).laborTargetRevenue > r.laborTargetRevenue);
+  close(compute({ laborTargetPct: 0.35 }).laborTargetRevenue, 13000 / 0.35); // 37,142.86
+});

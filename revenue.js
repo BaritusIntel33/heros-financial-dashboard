@@ -40,6 +40,9 @@
     const laborPctCurrent = i.currentRevenue > 0 ? i.labor / i.currentRevenue : NaN;
     const laborPctRequired = i.labor / requiredRevenue;
 
+    // Revenue at which actual payroll is exactly the labor target % of sales.
+    const laborTargetRevenue = i.laborTargetPct > 0 ? i.labor / i.laborTargetPct : NaN;
+
     return {
       inputs: i,
       errors,
@@ -50,6 +53,7 @@
       currentProfit,
       laborPctCurrent,
       laborPctRequired,
+      laborTargetRevenue,
       primePctCurrent: i.cogsPct + laborPctCurrent,
       primePctRequired: i.cogsPct + laborPctRequired,
       breakdown: {
