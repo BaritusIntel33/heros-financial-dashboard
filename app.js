@@ -95,15 +95,6 @@
         : r.primePctRequired <= i.primeHighPct + 0.05 ? 'warn' : 'bad');
     $('primeNote').textContent = `At required revenue · target ${fmtPct(i.primeLowPct)}–${fmtPct(i.primeHighPct)} · today ${fmtPct(r.primePctCurrent)}`;
 
-    $('laborBudget').textContent = fmtMoney(r.laborBudget);
-    $('laborOverBudget').textContent = r.laborOverBudget > 0 ? fmtMoney(r.laborOverBudget) : 'None — within target';
-    $('requiredRevenueAtLaborTarget').textContent = fmtMoney(r.requiredRevenueAtLaborTarget);
-    $('revenueForLaborTarget').textContent = fmtMoney(r.revenueForLaborTarget);
-    $('primeHighLabel').textContent = `Revenue where prime cost hits ${pctLabel(i.primeHighPct)}`;
-    $('primeLowLabel').textContent = `Revenue where prime cost hits ${pctLabel(i.primeLowPct)}`;
-    $('revenueForPrimeHigh').textContent = fmtMoney(r.revenueForPrimeHigh);
-    $('revenueForPrimeLow').textContent = fmtMoney(r.revenueForPrimeLow);
-
     save(values);
   }
 

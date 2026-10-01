@@ -40,17 +40,6 @@
     const laborPctCurrent = i.currentRevenue > 0 ? i.labor / i.currentRevenue : NaN;
     const laborPctRequired = i.labor / requiredRevenue;
 
-    // Labor dollars allowed if labor sat exactly at its target share of required revenue.
-    const laborBudget = i.laborTargetPct * requiredRevenue;
-
-    // Required revenue if labor scaled with sales at the target %:
-    //   R = (t·R + OpEx + Profit) / (1 − COGS)  →  R = (OpEx + Profit) / (1 − COGS − t)
-    const requiredRevenueAtLaborTarget = grossUp(i.opex + i.desiredProfit, i.cogsPct + i.laborTargetPct);
-
-    // Revenue at which the current labor dollars hit each target %.
-    const revenueForLaborTarget = i.laborTargetPct > 0 ? i.labor / i.laborTargetPct : NaN;
-    const primeGap = (p) => (p > i.cogsPct ? i.labor / (p - i.cogsPct) : NaN);
-
     return {
       inputs: i,
       errors,
@@ -61,14 +50,8 @@
       currentProfit,
       laborPctCurrent,
       laborPctRequired,
-      laborBudget,
-      laborOverBudget: i.labor - laborBudget,
-      requiredRevenueAtLaborTarget,
-      revenueForLaborTarget,
       primePctCurrent: i.cogsPct + laborPctCurrent,
       primePctRequired: i.cogsPct + laborPctRequired,
-      revenueForPrimeHigh: primeGap(i.primeHighPct),
-      revenueForPrimeLow: primeGap(i.primeLowPct),
       breakdown: {
         cogs: requiredRevenue * i.cogsPct,
         labor: i.labor,

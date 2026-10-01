@@ -24,15 +24,6 @@ test('labor and prime cost percentages', () => {
   const r = compute(DEFAULTS);
   close(r.laborPctRequired, 13000 / (19000 / 0.71), 1e-9);
   close(r.primePctRequired, 0.29 + r.laborPctRequired, 1e-9);
-  close(r.laborBudget, 0.315 * r.requiredRevenue);
-  close(r.revenueForLaborTarget, 13000 / 0.315);
-  close(r.revenueForPrimeHigh, 13000 / (0.60 - 0.29));
-});
-
-test('required revenue when labor scales at target %', () => {
-  const r = compute(DEFAULTS);
-  // (4,000 + 2,000) / (1 − 0.29 − 0.315)
-  close(r.requiredRevenueAtLaborTarget, 6000 / 0.395);
 });
 
 test('inputs override defaults', () => {

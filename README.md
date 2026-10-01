@@ -30,7 +30,6 @@ It also shows:
 - profit at current revenue
 - labor % and prime cost % compared with your targets
 - a breakdown of the required revenue into COGS, labor, OpEx and profit
-- **Paths to target**: the labor budget at the target %, and the revenue at which labor or prime cost reaches each target
 
 Labor and OpEx are treated as fixed monthly dollars. COGS scales with revenue.
 
