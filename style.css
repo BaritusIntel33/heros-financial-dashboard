@@ -376,6 +376,34 @@ input[type="range"] { accent-color: var(--accent); height: 20px; }
    ===================================================================== */
 .sc-intro { color: var(--muted); font-size: 0.85rem; margin: -6px 0 16px; }
 
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--input-bg);
+  max-width: 100%;
+}
+.segmented-label { padding: 0 8px 0 6px; font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+.seg-opt {
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.seg-opt:hover { color: var(--text); }
+.seg-opt[aria-checked="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
 .stepper { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; max-width: 420px; }
 .stepper .btn.step { height: 44px; padding: 0 16px; font-weight: 600; font-variant-numeric: tabular-nums; user-select: none; touch-action: manipulation; }
 .stepper .input-wrap input { height: 44px; text-align: center; font-size: 1.1rem; font-weight: 600; }

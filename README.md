@@ -45,6 +45,11 @@ Reserve = Revenue − Revenue × COGS % − Revenue × Labor target % − OpEx
 
 Green means money left over that you could add to spending. Red means a shortfall to cut or cover. Each $100 of revenue changes the reserve by $100 × (1 − COGS % − labor %), which is $39.50 at the defaults.
 
+The **Labor** switch chooses how labor is counted:
+
+- **Target %**, the default: labor is the target % of revenue (31.5% at the defaults). The reserve shows what you'd free up if labor ran at target. Each $100 of revenue adds $100 × (1 − COGS % − labor %), which is $39.50.
+- **Actual $:** labor is your real monthly labor dollars and stays fixed as revenue moves. The reserve is your real profit or loss at that revenue: $0 at break-even, and it reaches your profit goal at the required revenue. Each $100 of revenue adds $100 × (1 − COGS %), which is $71. The box shows labor as a % of revenue compared with your target.
+
 A stacked bar shows how the scenario revenue splits into COGS, labor, OpEx and the reserve, in dollars and as a % of revenue. When costs exceed revenue, the overrun shows as a striped red **Shortfall** past a marker where revenue ends.
 
 The Reserve box also shows:

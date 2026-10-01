@@ -124,7 +124,13 @@
           <h2 id="sc-title">Break-even scenario</h2>
           <button type="button" class="text-btn" id="sc-reset">Reset to break-even</button>
         </div>
-        <p class="sc-intro">Move revenue up or down from break-even. COGS and labor stay at their set percentages and OpEx stays fixed, so the reserve shows what you can add or need to cut.</p>
+        <p class="sc-intro" id="sc-intro">Move revenue up or down from break-even. COGS stays at its set percentage and OpEx stays fixed, so the reserve shows what you can add or need to cut.</p>
+
+        <div class="segmented" role="radiogroup" aria-label="Labor in this scenario">
+          <span class="segmented-label">Labor</span>
+          <button type="button" role="radio" class="seg-opt" data-labor-mode="target" id="sc-mode-target">Target %</button>
+          <button type="button" role="radio" class="seg-opt" data-labor-mode="actual" id="sc-mode-actual">Actual $</button>
+        </div>
 
         <div class="stepper">
           <button type="button" class="btn step" data-step="-100" aria-label="Decrease revenue by $100">− $100</button>

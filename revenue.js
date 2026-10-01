@@ -65,12 +65,15 @@
    * What's left at a given revenue when COGS and labor are held at their set
    * percentages (COGS % and labor target %) and OpEx stays fixed.
    */
-  function scenario(input, revenue) {
+  function scenario(input, revenue, laborMode = 'target') {
     const i = { ...DEFAULTS, ...input };
+    const actual = laborMode === 'actual';
     const cogs = revenue * i.cogsPct;
-    const labor = revenue * i.laborTargetPct;
+    // Target: labor scales with revenue at the target %. Actual: labor is the fixed monthly dollars.
+    const labor = actual ? i.labor : revenue * i.laborTargetPct;
     const reserve = revenue - cogs - labor - i.opex;
     return {
+      laborMode: actual ? 'actual' : 'target',
       revenue,
       cogs,
       labor,
@@ -78,10 +81,16 @@
       reserve,
       reserveAfterProfit: reserve - i.desiredProfit,
       // Labor dollars the target % allows here, compared with actual monthly labor.
-      laborVsCurrent: labor - i.labor,
+      laborBudget: revenue * i.laborTargetPct,
+      laborVsCurrent: revenue * i.laborTargetPct - i.labor,
+      laborPctOfRevenue: revenue > 0 ? i.labor / revenue : NaN,
       // Revenue at which the reserve is exactly $0, and exactly the desired profit.
-      zeroReserveRevenue: grossUp(i.opex, i.cogsPct + i.laborTargetPct),
-      profitReserveRevenue: grossUp(i.opex + i.desiredProfit, i.cogsPct + i.laborTargetPct),
+      zeroReserveRevenue: actual
+        ? grossUp(i.labor + i.opex, i.cogsPct)
+        : grossUp(i.opex, i.cogsPct + i.laborTargetPct),
+      profitReserveRevenue: actual
+        ? grossUp(i.labor + i.opex + i.desiredProfit, i.cogsPct)
+        : grossUp(i.opex + i.desiredProfit, i.cogsPct + i.laborTargetPct),
     };
   }
 

@@ -59,3 +59,20 @@ test('reserve is zero at OpEx / (1 − COGS% − labor%)', () => {
   close(scenario(DEFAULTS, s.zeroReserveRevenue).reserve, 0);
   close(scenario(DEFAULTS, s.profitReserveRevenue).reserveAfterProfit, 0);
 });
+
+test('actual-labor scenario keeps labor at fixed dollars', () => {
+  const r = compute(DEFAULTS);
+  const s = scenario(DEFAULTS, r.breakEvenRevenue, 'actual');
+  assert.equal(s.labor, 13000);
+  close(s.reserve, 0); // break-even means $0 left with real labor
+  close(s.zeroReserveRevenue, r.breakEvenRevenue);
+  close(s.profitReserveRevenue, r.requiredRevenue);
+  close(scenario(DEFAULTS, r.requiredRevenue, 'actual').reserveAfterProfit, 0);
+  close(s.laborPctOfRevenue, 13000 / r.breakEvenRevenue, 1e-9);
+});
+
+test('actual-labor scenario: each $100 adds $100 × (1 − COGS%)', () => {
+  const a = scenario(DEFAULTS, 20000, 'actual');
+  const b = scenario(DEFAULTS, 20100, 'actual');
+  close(b.reserve - a.reserve, 71);
+});

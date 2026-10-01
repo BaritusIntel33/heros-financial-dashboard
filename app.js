@@ -136,6 +136,10 @@
   try { offset = Number(localStorage.getItem(SCENARIO_KEY)) || 0; } catch { /* ignore */ }
   let lastResult = null;
 
+  const LABOR_MODE_KEY = 'scenario-labor-mode';
+  let laborMode = 'target';
+  try { if (localStorage.getItem(LABOR_MODE_KEY) === 'actual') laborMode = 'actual'; } catch { /* ignore */ }
+
   const signed = (n) => (n >= 0 ? `+${fmtMoney(n)}` : fmtMoney(n));
 
   function setOffset(next) {
@@ -153,8 +157,18 @@
       return;
     }
     const revenue = Math.max(0, base + offset);
-    const s = scenario(r.inputs, revenue);
+    const s = scenario(r.inputs, revenue, laborMode);
     const i = r.inputs;
+    const actual = laborMode === 'actual';
+
+    for (const btn of document.querySelectorAll('[data-labor-mode]')) {
+      btn.setAttribute('aria-checked', String(btn.dataset.laborMode === laborMode));
+    }
+    $('sc-mode-target').textContent = `Target ${pctLabel(i.laborTargetPct)}`;
+    $('sc-mode-actual').textContent = `Actual ${fmtMoney(i.labor)}`;
+    $('sc-intro').textContent = actual
+      ? `Move revenue up or down from break-even. COGS stays at ${pctLabel(i.cogsPct)}, while labor (${fmtMoney(i.labor)}) and OpEx stay fixed dollars, so each $100 of revenue adds ${fmtMoney(100 * (1 - i.cogsPct))} to the reserve.`
+      : `Move revenue up or down from break-even. COGS and labor stay at their set percentages and OpEx stays fixed, so each $100 of revenue adds ${fmtMoney(100 * (1 - i.cogsPct - i.laborTargetPct))} to the reserve.`;
 
     if (document.activeElement !== revInput) revInput.value = Math.round(revenue);
     $('sc-offset').textContent = Math.abs(offset) < 0.5
@@ -164,7 +178,7 @@
     $('sc-rev').textContent = fmtMoney(s.revenue);
     $('sc-cogs-label').textContent = `COGS at ${pctLabel(i.cogsPct)}`;
     $('sc-cogs').textContent = `−${fmtMoney(s.cogs)}`;
-    $('sc-labor-label').textContent = `Labor at ${pctLabel(i.laborTargetPct)}`;
+    $('sc-labor-label').textContent = actual ? 'Labor (actual, fixed)' : `Labor at ${pctLabel(i.laborTargetPct)}`;
     $('sc-labor').textContent = `−${fmtMoney(s.labor)}`;
     $('sc-opex').textContent = `−${fmtMoney(s.opex)}`;
 
@@ -183,11 +197,16 @@
     setTone(after, s.reserveAfterProfit >= 0 ? 'good' : 'bad');
 
     const laborVs = $('sc-labor-vs');
-    laborVs.textContent = s.laborVsCurrent >= 0
-      ? `${fmtMoney(s.labor)} budget, ${fmtMoney(s.laborVsCurrent)} to spare`
-      : `${fmtMoney(s.labor)} budget, ${fmtMoney(-s.laborVsCurrent)} over`;
+    if (actual) {
+      $('sc-labor-vs-label').textContent = `Labor as % of revenue (target ${pctLabel(i.laborTargetPct)})`;
+      laborVs.textContent = fmtPct(s.laborPctOfRevenue);
+    } else {
+      $('sc-labor-vs-label').textContent = `Labor budget vs current ${fmtMoney(i.labor)}`;
+      laborVs.textContent = s.laborVsCurrent >= 0
+        ? `${fmtMoney(s.laborBudget)} budget, ${fmtMoney(s.laborVsCurrent)} to spare`
+        : `${fmtMoney(s.laborBudget)} budget, ${fmtMoney(-s.laborVsCurrent)} over`;
+    }
     setTone(laborVs, s.laborVsCurrent >= 0 ? 'good' : 'bad');
-    $('sc-labor-vs-label').textContent = `Labor budget vs current ${fmtMoney(i.labor)}`;
 
     $('sc-zero').textContent = fmtMoney(s.zeroReserveRevenue);
     $('sc-goal').textContent = fmtMoney(s.profitReserveRevenue);
@@ -261,6 +280,14 @@
   });
   $('sc-revenue').addEventListener('blur', () => renderScenario(lastResult));
   $('sc-reset').addEventListener('click', () => setOffset(0));
+
+  document.querySelectorAll('[data-labor-mode]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      laborMode = btn.dataset.laborMode;
+      try { localStorage.setItem(LABOR_MODE_KEY, laborMode); } catch { /* ignore */ }
+      renderScenario(lastResult);
+    });
+  });
 
   // ---------- events ----------
   form.addEventListener('input', (e) => {
