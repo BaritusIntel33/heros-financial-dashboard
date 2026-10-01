@@ -1,17 +1,28 @@
 // Run with: node --test
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { compute, scenario, DEFAULTS } = require('./revenue.js');
+const { compute, scenario, migrate, DEFAULTS } = require('./revenue.js');
 
 const close = (actual, expected, eps = 0.01) =>
   assert.ok(Math.abs(actual - expected) < eps, `expected ${expected}, got ${actual}`);
 
 test('required revenue matches the formula with starting values', () => {
   const r = compute(DEFAULTS);
-  // (13,000 + 4,000 + 2,000) / (1 − 0.29)
-  close(r.requiredRevenue, 19000 / 0.71);
-  close(r.requiredRevenue, 26760.56);
-  close(r.revenueGap, 9760.56);
+  // (13,000 + 4,000) / (1 − 0.29 − 0.075)
+  close(r.requiredRevenue, 17000 / 0.635);
+  close(r.requiredRevenue, 26771.65);
+  close(r.desiredProfit, r.requiredRevenue * 0.075); // 2,007.87
+  // Same as the dollar form: (Labor + OpEx + Profit $) / (1 − COGS %)
+  close(r.requiredRevenue, (17000 + r.desiredProfit) / 0.71);
+  close(r.revenueGap, 26771.65 - 17000);
+});
+
+test('saved dollar profit converts to the % with the same required revenue', () => {
+  const saved = migrate({ desiredProfit: 2000 });
+  assert.equal(saved.desiredProfit, undefined);
+  close(compute(saved).requiredRevenue, 19000 / 0.71, 5); // old result, within % rounding
+  assert.equal(migrate({ desiredProfit: 0 }).desiredProfitPct, 0);
+  assert.equal(migrate({ desiredProfitPct: 0.1 }).desiredProfitPct, 0.1);
 });
 
 test('break-even and current profit', () => {
@@ -22,13 +33,13 @@ test('break-even and current profit', () => {
 
 test('labor and prime cost percentages', () => {
   const r = compute(DEFAULTS);
-  close(r.laborPctRequired, 13000 / (19000 / 0.71), 1e-9);
+  close(r.laborPctRequired, 13000 / (17000 / 0.635), 1e-9);
   close(r.primePctRequired, 0.29 + r.laborPctRequired, 1e-9);
 });
 
 test('inputs override defaults', () => {
   const r = compute({ labor: 8000 });
-  close(r.requiredRevenue, 14000 / 0.71);
+  close(r.requiredRevenue, 12000 / 0.635);
 });
 
 test('invalid COGS is reported, not thrown', () => {
@@ -43,7 +54,8 @@ test('break-even scenario holds COGS and labor at their percentages', () => {
   close(s.cogs, breakEven * 0.29);
   close(s.labor, breakEven * 0.315);
   close(s.reserve, breakEven * (1 - 0.29 - 0.315) - 4000); // 5,457.75 left over
-  close(s.reserveAfterProfit, s.reserve - 2000);
+  close(s.profit, breakEven * 0.075);
+  close(s.reserveAfterProfit, s.reserve - breakEven * 0.075);
   close(s.laborVsCurrent, breakEven * 0.315 - 13000);
 });
 

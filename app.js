@@ -1,9 +1,9 @@
 (function () {
   'use strict';
 
-  const { DEFAULTS, compute, scenario } = window.Revenue;
+  const { DEFAULTS, migrate, compute, scenario } = window.Revenue;
   const STORAGE_KEY = 'required-revenue-inputs';
-  const PCT_FIELDS = new Set(['cogsPct', 'laborTargetPct', 'primeLowPct', 'primeHighPct']);
+  const PCT_FIELDS = new Set(['cogsPct', 'laborTargetPct', 'desiredProfitPct', 'primeLowPct', 'primeHighPct']);
   const FIELDS = Object.keys(DEFAULTS);
 
   const $ = (id) => document.getElementById(id);
@@ -16,7 +16,7 @@
 
   // ---------- storage (optional, never required) ----------
   function load() {
-    try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }; }
+    try { return { ...DEFAULTS, ...migrate(JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')) }; }
     catch { return { ...DEFAULTS }; }
   }
   function save(values) {
@@ -78,10 +78,14 @@
 
     const profit = $('currentProfit');
     profit.textContent = fmtMoney(r.currentProfit);
-    setTone(profit, r.currentProfit >= i.desiredProfit ? 'good' : r.currentProfit >= 0 ? 'warn' : 'bad');
+    setTone(profit, r.currentProfit >= r.currentProfitGoal ? 'good' : r.currentProfit >= 0 ? 'warn' : 'bad');
     $('currentProfitNote').textContent = r.currentProfit < 0
       ? `Loss at ${fmtMoney(i.currentRevenue)} of sales`
-      : `vs ${fmtMoney(i.desiredProfit)} goal`;
+      : `vs ${fmtMoney(r.currentProfitGoal)} goal (${pctLabel(i.desiredProfitPct)} of sales)`;
+
+    $('profitDollars').textContent = Number.isFinite(r.desiredProfit)
+      ? `= ${fmtMoney(r.desiredProfit)} / mo at required revenue · ${fmtMoney(r.currentProfitGoal)} at current revenue`
+      : '';
 
     const labor = $('laborPctRequired');
     labor.textContent = fmtPct(r.laborPctRequired);
@@ -210,7 +214,8 @@
       ? `Left over: room to add ${fmtMoney(s.reserve)} a month`
       : `Short: ${fmtMoney(-s.reserve)} a month to cut or cover`;
 
-    $('sc-after-label').textContent = `After ${fmtMoney(i.desiredProfit)} desired profit`;
+    $('sc-profit-label').textContent = `Desired profit (${pctLabel(i.desiredProfitPct)} of revenue)`;
+    $('sc-profit').textContent = `−${fmtMoney(s.profit)}`;
     const after = $('sc-after');
     after.textContent = signed(s.reserveAfterProfit);
     setTone(after, s.reserveAfterProfit >= 0 ? 'good' : 'bad');

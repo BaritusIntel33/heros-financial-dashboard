@@ -9,8 +9,10 @@ A small, dependency-free financial dashboard. It has two tabs and a payroll calc
 This tab works out the monthly revenue needed to cover costs and hit a profit goal.
 
 ```
-Required Revenue = (Labor + OpEx + Desired Profit) ÷ (1 − COGS %)
+Required Revenue = (Labor + OpEx) ÷ (1 − COGS % − Desired Profit %)
 ```
+
+Desired profit is a **% of revenue** (a net margin). The page also shows what that % comes to in dollars at the required revenue and at current revenue.
 
 | Input                   | Default   |
 | ----------------------- | --------- |
@@ -19,10 +21,12 @@ Required Revenue = (Labor + OpEx + Desired Profit) ÷ (1 − COGS %)
 | Monthly labor           | $13,000   |
 | Labor target            | 31.5%     |
 | OpEx                    | $4,000    |
-| Desired profit          | $2,000    |
+| Desired profit          | 7.5% of revenue |
 | Prime cost target       | 55–60%    |
 
-With these defaults the required revenue is **$26,761** per month, which is $9,761 (+57.4%) above current revenue.
+With these defaults the required revenue is **$26,772** per month: $17,000 ÷ (1 − 29% − 7.5%). Of that, $2,008 is profit, and the total is $9,772 (+57.5%) above current revenue.
+
+If you saved a dollar profit in an earlier version, it is converted to the % that gives the same required revenue.
 
 It also shows:
 
@@ -54,7 +58,7 @@ A stacked bar shows how the scenario revenue splits into COGS, labor, OpEx and t
 
 The Reserve box also shows:
 
-- the reserve after your desired profit
+- the **desired profit** at that revenue (revenue × profit %), taken out of the reserve, and what is **left after profit**
 - the labor budget at this revenue compared with your current monthly labor
 - the revenue where the reserve is $0
 - the revenue where the reserve covers your profit goal

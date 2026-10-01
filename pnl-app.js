@@ -182,8 +182,9 @@
       band(t.laborPct, i.laborTargetPct));
     check('chk-prime', `${fmtPct(t.primePct)} vs ${fmtPct(i.primeLowPct)}–${fmtPct(i.primeHighPct)}`,
       band(t.primePct, i.primeHighPct, 0.05));
-    check('chk-profit', `${fmtMoney(t.netProfit)} vs ${fmtMoney(i.desiredProfit)}`,
-      t.netProfit >= i.desiredProfit ? 'good' : t.netProfit >= 0 ? 'warn' : 'bad');
+    const goal = t.sales * i.desiredProfitPct;
+    check('chk-profit', `${fmtMoney(t.netProfit)} vs ${fmtMoney(goal)} (${fmtPct(t.netMargin)} vs ${fmtPct(i.desiredProfitPct)})`,
+      t.netProfit >= goal ? 'good' : t.netProfit >= 0 ? 'warn' : 'bad');
   }
 
   function renderHistory() {

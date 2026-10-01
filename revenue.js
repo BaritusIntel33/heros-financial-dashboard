@@ -1,7 +1,10 @@
 /**
  * Required-revenue math. Pure functions, no DOM — usable in the browser and Node.
  *
- *   Required Revenue = (Labor + OpEx + Desired Profit) ÷ (1 − COGS %)
+ *   Required Revenue = (Labor + OpEx) ÷ (1 − COGS % − Desired Profit %)
+ *
+ * Desired profit is a % of revenue, so it is the same as
+ * (Labor + OpEx + Profit $) ÷ (1 − COGS %) with Profit $ = Revenue × Profit %.
  *
  * All percentages are decimals (0.29 = 29%). All money values are monthly.
  */
@@ -14,7 +17,7 @@
     labor: 13000,
     laborTargetPct: 0.315,
     opex: 4000,
-    desiredProfit: 2000,
+    desiredProfitPct: 0.075,
     primeLowPct: 0.55,
     primeHighPct: 0.60,
   });
@@ -25,14 +28,32 @@
     return margin > 0 ? fixed / margin : NaN;
   }
 
+  /**
+   * Inputs saved before profit was a % (`desiredProfit` in dollars) are converted to the
+   * % that gives the same required revenue: P × (1 − COGS) ÷ (Labor + OpEx + P).
+   */
+  function migrate(saved) {
+    const s = { ...saved };
+    if (s.desiredProfitPct === undefined && s.desiredProfit !== undefined) {
+      const i = { ...DEFAULTS, ...s };
+      const p = Number(s.desiredProfit) || 0;
+      const total = i.labor + i.opex + p;
+      s.desiredProfitPct = total > 0 ? Math.round((p * (1 - i.cogsPct) / total) * 10000) / 10000 : 0;
+    }
+    delete s.desiredProfit;
+    return s;
+  }
+
   function compute(input) {
     const i = { ...DEFAULTS, ...input };
     const errors = [];
     if (i.cogsPct >= 1) errors.push('COGS must be below 100%.');
     if (i.cogsPct < 0) errors.push('COGS cannot be negative.');
+    if (i.cogsPct + i.desiredProfitPct >= 1) errors.push('COGS % plus desired profit % must be below 100%.');
     if (i.primeLowPct > i.primeHighPct) errors.push('Prime cost low target is above the high target.');
 
-    const requiredRevenue = grossUp(i.labor + i.opex + i.desiredProfit, i.cogsPct);
+    const requiredRevenue = grossUp(i.labor + i.opex, i.cogsPct + i.desiredProfitPct);
+    const desiredProfit = requiredRevenue * i.desiredProfitPct;
     const breakEvenRevenue = grossUp(i.labor + i.opex, i.cogsPct);
     const revenueGap = requiredRevenue - i.currentRevenue;
 
@@ -54,13 +75,15 @@
       laborPctCurrent,
       laborPctRequired,
       laborTargetRevenue,
+      desiredProfit,
+      currentProfitGoal: i.currentRevenue * i.desiredProfitPct,
       primePctCurrent: i.cogsPct + laborPctCurrent,
       primePctRequired: i.cogsPct + laborPctRequired,
       breakdown: {
         cogs: requiredRevenue * i.cogsPct,
         labor: i.labor,
         opex: i.opex,
-        profit: i.desiredProfit,
+        profit: desiredProfit,
       },
     };
   }
@@ -83,7 +106,9 @@
       labor,
       opex: i.opex,
       reserve,
-      reserveAfterProfit: reserve - i.desiredProfit,
+      // Desired profit at this revenue, taken out of the reserve.
+      profit: revenue * i.desiredProfitPct,
+      reserveAfterProfit: reserve - revenue * i.desiredProfitPct,
       // Labor dollars the target % allows here, compared with actual monthly labor.
       laborBudget: revenue * i.laborTargetPct,
       laborVsCurrent: revenue * i.laborTargetPct - i.labor,
@@ -93,12 +118,12 @@
         ? grossUp(i.labor + i.opex, i.cogsPct)
         : grossUp(i.opex, i.cogsPct + i.laborTargetPct),
       profitReserveRevenue: actual
-        ? grossUp(i.labor + i.opex + i.desiredProfit, i.cogsPct)
-        : grossUp(i.opex + i.desiredProfit, i.cogsPct + i.laborTargetPct),
+        ? grossUp(i.labor + i.opex, i.cogsPct + i.desiredProfitPct)
+        : grossUp(i.opex, i.cogsPct + i.laborTargetPct + i.desiredProfitPct),
     };
   }
 
-  const api = { DEFAULTS, compute, grossUp, scenario };
+  const api = { DEFAULTS, migrate, compute, grossUp, scenario };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Revenue = api;
 })(typeof window !== 'undefined' ? window : globalThis);

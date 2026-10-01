@@ -26,7 +26,7 @@
   </header>
 
   <main class="layout view" id="view-revenue" data-view="revenue">
-    <p class="formula">Required Revenue = (Labor + OpEx + Desired Profit) ÷ (1 − COGS %)</p>
+    <p class="formula">Required Revenue = (Labor + OpEx) ÷ (1 − COGS % − Desired Profit %)</p>
 
     <!-- Inputs -->
     <form class="panel inputs" id="inputs" autocomplete="off" novalidate>
@@ -70,8 +70,12 @@
       </div>
 
       <div class="field">
-        <label for="desiredProfit">Desired profit</label>
-        <div class="input-wrap money"><input type="number" id="desiredProfit" name="desiredProfit" min="0" step="100" inputmode="decimal" /></div>
+        <label for="desiredProfitPct">Desired profit (% of revenue)</label>
+        <div class="input-row">
+          <input type="range" data-for="desiredProfitPct" min="0" max="30" step="0.5" aria-label="Desired profit slider" />
+          <div class="input-wrap pct"><input type="number" id="desiredProfitPct" name="desiredProfitPct" min="0" max="99" step="0.5" inputmode="decimal" /></div>
+        </div>
+        <p class="hint" id="profitDollars"></p>
       </div>
 
       <div class="field">
@@ -164,7 +168,8 @@
             <p class="reserve-value" id="sc-reserve">—</p>
             <p class="note" id="sc-reserve-note">—</p>
             <dl class="reserve-details">
-              <div><dt id="sc-after-label">After desired profit</dt><dd id="sc-after">—</dd></div>
+              <div><dt id="sc-profit-label">Desired profit</dt><dd id="sc-profit">—</dd></div>
+              <div class="after-row"><dt>Left after profit</dt><dd id="sc-after">—</dd></div>
               <div><dt id="sc-labor-vs-label">Labor budget vs current labor</dt><dd id="sc-labor-vs">—</dd></div>
               <div><dt>Reserve is $0 at</dt><dd id="sc-zero">—</dd></div>
               <div><dt>Reserve covers profit goal at</dt><dd id="sc-goal">—</dd></div>
